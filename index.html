@@ -10,22 +10,34 @@
   <button onclick="send()">发送</button>
   <div id="chat"></div>
 
-  <script>
-    async function send() {
-      const input = document.getElementById("input");
-      const text = input.value;
+ <script>
+async function sendMessage() {
+  const input = document.getElementById("input");
+  const message = input.value;
 
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          messages: [
-            { role: "user", content: text }
-          ]
-        })
-      });
+  const chat = document.getElementById("chat");
+
+  chat.innerHTML += `<p>你：${message}</p >`;
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+
+    chat.innerHTML += `<p>AI：${data.reply}</p >`;
+  } catch (e) {
+    chat.innerHTML += `<p>AI：连接失败了…</p >`;
+  }
+
+  input.value = "";
+}
+</script>
 
       const data = await res.json();
 
