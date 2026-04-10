@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Milk Tea Chat</title>
+</head>
+<body>
+  <h2>奶茶AI聊天</h2>
+  <input id="input" placeholder="说点什么..." />
+  <button onclick="send()">发送</button>
+  <div id="chat"></div>
+
+  <script>
+    async function send() {
+      const input = document.getElementById("input");
+      const text = input.value;
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          messages: [
+            { role: "user", content: text }
+          ]
+        })
+      });
+
+      const data = await res.json();
+
+      document.getElementById("chat").innerHTML +=
+        "<p>你：" + text + "</p >" +
+        "<p>AI：" + data.choices?.[0]?.message?.content + "</p >";
+
+      input.value = "";
+    }
+  </script>
+</body>
+</html>
