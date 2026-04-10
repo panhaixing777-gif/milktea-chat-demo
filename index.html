@@ -27,7 +27,7 @@
     }
 
     .header {
-      background: #ff7aa2;
+      background: #ff6f9c;
       color: white;
       padding: 14px;
       text-align: center;
@@ -72,7 +72,7 @@
 
     button {
       border: none;
-      background: #ff4f88;
+      background: #ff3f7f;
       color: white;
       padding: 10px 14px;
       cursor: pointer;
@@ -124,23 +124,22 @@ async function send() {
       body: JSON.stringify({ messages: history })
     });
 
-    const data = await res.json();
+    const raw = await res.text();
+    console.log("RAW:", raw);
 
-    console.log("API返回：", data);
+    const data = JSON.parse(raw);
 
-    const reply = data.reply;
-
-    if (!reply) {
-      addMsg("ai", "我刚刚有点卡住了🥺 再说一次好吗");
+    if (!data.reply) {
+      addMsg("ai", "我刚刚卡住了🥺 再说一次好吗");
       return;
     }
 
-    addMsg("ai", reply);
-    history.push({ role: "assistant", content: reply });
+    addMsg("ai", data.reply);
+    history.push({ role: "assistant", content: data.reply });
 
   } catch (err) {
     console.error(err);
-    addMsg("ai", "网络有点不太好…🥺");
+    addMsg("ai", "网络有点不稳定🥺：" + err.message);
   }
 }
 
