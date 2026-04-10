@@ -1,3 +1,6 @@
+console.log("🔥 API HIT");
+console.log("KEY EXISTS:", !!process.env.DEEPSEEK_API_KEY);
+console.log("BODY:", req.body);
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Only POST allowed" });
