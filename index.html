@@ -1,51 +1,176 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>Milk Tea Chat</title>
+  <meta charset="UTF-8" />
+  <title>奶茶AI聊天</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont;
+      background: linear-gradient(135deg, #f8f1e7, #f3e7d9);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .container {
+      width: 360px;
+      height: 600px;
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 16px;
+      text-align: center;
+      font-weight: 600;
+      color: #6b4f3b;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    #chat {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      margin: 8px 0;
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .user {
+      justify-content: flex-end;
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .user .bubble {
+      background: #d8c3a5;
+      color: #3e2f23;
+      border-bottom-right-radius: 4px;
+    }
+
+    .ai .bubble {
+      background: #ffffff;
+      color: #5a4634;
+      border-bottom-left-radius: 4px;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 12px;
+      gap: 8px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    input {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.8);
+      outline: none;
+    }
+
+    button {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 20px;
+      background: #c7a98b;
+      color: white;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #b89574;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <h2>奶茶AI聊天</h2>
-  <input id="input" placeholder="说点什么..." />
-  <button onclick="send()">发送</button>
-  <div id="chat"></div>
+  <div class="container">
+    <div class="header">奶茶 AI ☕</div>
 
- <script>
-async function sendMessage() {
-  const input = document.getElementById("input");
-  const message = input.value;
+    <div id="chat"></div>
 
-  const chat = document.getElementById("chat");
+    <div class="input-area">
+      <input id="input" placeholder="说点什么..." />
+      <button onclick="sendMessage()">发送</button>
+    </div>
+  </div>
 
-  chat.innerHTML += `<p>你：${message}</p >`;
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("input");
+      const message = input.value.trim();
+      if (!message) return;
 
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ message })
-    });
+      const chat = document.getElementById("chat");
 
-    const data = await res.json();
-
-    chat.innerHTML += `<p>AI：${data.reply}</p >`;
-  } catch (e) {
-    chat.innerHTML += `<p>AI：连接失败了…</p >`;
-  }
-
-  input.value = "";
-}
-</script>
-
-      const data = await res.json();
-
-      document.getElementById("chat").innerHTML +=
-        "<p>你：" + text + "</p >" +
-        "<p>AI：" + data.choices?.[0]?.message?.content + "</p >";
+      // 用户消息
+      chat.innerHTML += `
+        <div class="msg user">
+          <div class="bubble">${message}</div>
+        </div>
+      `;
 
       input.value = "";
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ message })
+        });
+
+        const data = await res.json();
+
+        const reply = data.reply || "AI走神了…";
+
+        // AI消息
+        chat.innerHTML += `
+          <div class="msg ai">
+            <div class="bubble">${reply}</div>
+          </div>
+        `;
+
+        chat.scrollTop = chat.scrollHeight;
+
+      } catch (e) {
+        chat.innerHTML += `
+          <div class="msg ai">
+            <div class="bubble">连接失败了…</div>
+          </div>
+        `;
+      }
     }
   </script>
 </body>
