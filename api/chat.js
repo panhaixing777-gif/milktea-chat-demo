@@ -1,10 +1,14 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ reply: 'Method not allowed' });
   }
 
   try {
-    const { message } = req.body;
+    const { message } = req.body || {};
+
+    if (!message) {
+      return res.status(400).json({ reply: "没收到消息" });
+    }
 
     const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -22,13 +26,13 @@ export default async function handler(req, res) {
 
     const reply =
       data.output?.[0]?.content?.[0]?.text ||
-      "AI有点走神了，请再试一次～";
+      "AI有点走神了…";
 
     res.status(200).json({ reply });
 
   } catch (error) {
     res.status(500).json({
-      reply: "出错了，请稍后再试～"
+      reply: "服务器出错了…"
     });
   }
 }
