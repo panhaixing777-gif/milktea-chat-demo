@@ -1,6 +1,5 @@
-export default async function handler(req, res) {
-  console.log("🔥 API HIT");
-
+export default async function handler(req,console.log("🔥 API HIT");
+}
   try {
     console.log("METHOD:", req.method);
 
