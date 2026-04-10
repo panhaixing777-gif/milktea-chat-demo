@@ -31,7 +31,7 @@
 
       document.getElementById("chat").innerHTML +=
         "<p>你：" + text + "</p >" +
-        "<p>AI：" + data.choices?.[0]?.message?.content + "</p >";
+        "<p>AI：" + (data.choices?.[0]?.message?.content || "出错了") + "</p >";
 
       input.value = "";
     }
