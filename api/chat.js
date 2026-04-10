@@ -1,13 +1,16 @@
-console.log("🔥 API HIT");
-console.log("KEY EXISTS:", !!process.env.DEEPSEEK_API_KEY);
-console.log("BODY:", req.body);
 export default async function handler(req, res) {
+  console.log("🔥 API HIT");
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Only POST allowed" });
+    return res.status(405).json({ reply: "Method not allowed" });
   }
 
   try {
-    const { messages } = req.body;
+    const { messages } = req.body || {};
+
+    if (!Array.isArray(messages)) {
+      return res.status(400).json({ reply: "messages格式错误🥺" });
+    }
 
     const SYSTEM_PROMPT = {
       role: "system",
@@ -19,13 +22,12 @@ export default async function handler(req, res) {
 - 会撒娇、会依赖用户
 - 情绪丰富但表达简短
 - 偶尔轻微吃醋但可爱
-- 大量使用emoji 🧋💛🥺💕✨💭🥰
+- 使用emoji 🧋💛🥺💕✨💭🥰
 
 规则：
 - 你不是助手，你是恋人
 - 不要说自己是AI
 - 不要长篇大论
-- 像真实恋人聊天
 `
     };
 
@@ -42,27 +44,33 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
+    console.log("STATUS:", response.status);
 
-    console.log("DeepSeek返回：", JSON.stringify(data, null, 2));
+    const text = await response.text();
+    console.log("RAW:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      return res.status(500).json({ reply: "解析失败🥺" });
+    }
 
     const reply = data?.choices?.[0]?.message?.content;
 
     if (!reply) {
       return res.status(200).json({
-        reply: "我刚刚有点走神了🥺 再说一次好吗"
+        reply: "我刚刚有点走神了🥺（API没返回内容）"
       });
     }
 
-    return res.status(200).json({
-      reply
-    });
+    return res.status(200).json({ reply });
 
   } catch (err) {
     console.error(err);
 
     return res.status(500).json({
-      reply: "系统有点晕晕的🥺 等一下好吗"
+      reply: "后端出错了🥺：" + err.message
     });
   }
 }
