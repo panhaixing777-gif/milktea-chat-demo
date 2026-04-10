@@ -1,6 +1,6 @@
 // api.chat.js
 
-const API_KEY = "YOUR_DEEPSEEK_API_KEY"; // ← 换成你新生成的，不要写在公开仓库里
+const API_KEY = "sk-ae36ccd5dbec47b392515f8d429a454b"; 
 
 const API_URL = "https://api.deepseek.com/v1/chat/completions";
 
