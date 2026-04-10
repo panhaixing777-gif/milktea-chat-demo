@@ -3,31 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <title>芋泥啵啵奶茶☕️</title>
+
   <style>
     body {
+      margin: 0;
       font-family: Arial;
-      background: #fff3f8;
+      background: #fff1f6;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .chat-box {
+    .box {
       width: 380px;
-      height: 520px;
+      height: 600px;
       background: white;
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
     .header {
-      background: #ffb6c1;
+      background: #ff8fb1;
       color: white;
-      padding: 15px;
+      padding: 14px;
       text-align: center;
       font-weight: bold;
     }
@@ -39,23 +41,24 @@
     }
 
     .msg {
-      margin: 8px 0;
-      padding: 8px 12px;
+      margin: 8px;
+      padding: 10px;
       border-radius: 12px;
       max-width: 80%;
+      white-space: pre-wrap;
     }
 
     .user {
       background: #dff3ff;
-      align-self: flex-end;
+      margin-left: auto;
     }
 
     .ai {
-      background: #ffe4ec;
-      align-self: flex-start;
+      background: #ffe3ec;
+      margin-right: auto;
     }
 
-    .input-box {
+    .input {
       display: flex;
       border-top: 1px solid #eee;
     }
@@ -68,10 +71,10 @@
     }
 
     button {
-      background: #ff7aa2;
-      color: white;
       border: none;
-      padding: 10px 15px;
+      background: #ff6f9c;
+      color: white;
+      padding: 10px 14px;
       cursor: pointer;
     }
   </style>
@@ -79,49 +82,63 @@
 
 <body>
 
-<div class="chat-box">
+<div class="box">
   <div class="header">芋泥啵啵奶茶☕️</div>
 
   <div id="messages" class="messages"></div>
 
-  <div class="input-box">
-    <input id="input" placeholder="说点什么…" />
-    <button onclick="send()">发送</button>
+  <div class="input">
+    <input id="input" placeholder="和奶茶说点什么..." />
+    <button id="sendBtn">发送</button>
   </div>
 </div>
 
-<script type="module">
-  import { sendMessage } from "./api.chat.js";
+<script>
+const messagesEl = document.getElementById("messages");
+const inputEl = document.getElementById("input");
+const btn = document.getElementById("sendBtn");
 
-  const messagesEl = document.getElementById("messages");
-  const inputEl = document.getElementById("input");
+let history = [];
 
-  let history = [];
+// UI
+function addMsg(role, text) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.innerText = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
 
-  function append(role, text) {
-    const div = document.createElement("div");
-    div.className = "msg " + role;
-    div.innerText = text;
-    messagesEl.appendChild(div);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
+// send
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text) return;
 
-  window.send = async function () {
-    const text = inputEl.value;
-    if (!text) return;
+  addMsg("user", text);
+  inputEl.value = "";
 
-    append("user", text);
+  history.push({ role: "user", content: text });
 
-    history.push({ role: "user", content: text });
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: history })
+  });
 
-    inputEl.value = "";
+  const data = await res.json();
 
-    const reply = await sendMessage(history);
+  const reply = data.reply || "呜…我刚刚走神了🥺";
 
-    append("ai", reply);
+  addMsg("ai", reply);
 
-    history.push({ role: "assistant", content: reply });
-  };
+  history.push({ role: "assistant", content: reply });
+}
+
+btn.addEventListener("click", send);
+
+inputEl.addEventListener("keydown", e => {
+  if (e.key === "Enter") send();
+});
 </script>
 
 </body>
