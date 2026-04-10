@@ -1,8 +1,4 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ reply: 'Method not allowed' });
-  }
-
   try {
     const { message } = req.body || {};
 
@@ -24,15 +20,36 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    const reply =
-      data.output?.[0]?.content?.[0]?.text ||
-      "AI有点走神了…";
+    console.log("完整返回：", JSON.stringify(data, null, 2));
+
+    // ✅ 更稳的解析方式（关键）
+    let reply = "";
+
+    if (data.output && data.output.length > 0) {
+      const contents = data.output[0].content;
+
+      if (contents && contents.length > 0) {
+        for (let c of contents) {
+          if (c.type === "output_text") {
+            reply += c.text;
+          }
+        }
+      }
+    }
+
+    // ❗ 如果还是空 → 把整个返回打给前端
+    if (!reply) {
+      return res.status(200).json({
+        reply: "⚠️ AI返回异常",
+        debug: data
+      });
+    }
 
     res.status(200).json({ reply });
 
   } catch (error) {
     res.status(500).json({
-      reply: "服务器出错了…"
+      reply: "服务器错误：" + error.message
     });
   }
 }
