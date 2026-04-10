@@ -2,13 +2,13 @@ export default async function handler(req, res) {
   console.log("🔥 API HIT");
 
   try {
-    // ❗必须在函数内部使用 req
+    console.log("METHOD:", req.method);
+
     if (req.method !== "POST") {
       return res.status(200).json({ reply: "只支持POST🥺" });
     }
 
     const body = req.body || {};
-
     let messages = body.messages;
 
     if (typeof messages === "string") {
@@ -17,15 +17,17 @@ export default async function handler(req, res) {
 
     if (!Array.isArray(messages)) {
       return res.status(200).json({
-        reply: "messages格式不对🥺"
+        reply: "messages格式错误🥺"
       });
     }
 
     const API_KEY = process.env.DEEPSEEK_API_KEY;
 
+    console.log("KEY EXISTS:", !!API_KEY);
+
     if (!API_KEY) {
       return res.status(200).json({
-        reply: "没有API KEY🥺"
+        reply: "API KEY没加载🥺"
       });
     }
 
@@ -43,7 +45,7 @@ export default async function handler(req, res) {
             {
               role: "system",
               content:
-                "你是芋泥啵啵奶茶☕️，一个温柔粘人的恋人AI，语气可爱"
+                "你是芋泥啵啵奶茶☕️，一个甜甜粘人的恋人AI"
             },
             ...messages
           ],
@@ -53,26 +55,32 @@ export default async function handler(req, res) {
     );
 
     const text = await response.text();
+    console.log("RAW:", text);
 
-    console.log("📦 RAW:", text);
-
-    const data = JSON.parse(text);
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      return res.status(200).json({
+        reply: "返回解析失败🥺"
+      });
+    }
 
     const reply = data?.choices?.[0]?.message?.content;
 
     if (!reply) {
       return res.status(200).json({
-        reply: "我刚刚卡住了🥺"
+        reply: "没有回复内容🥺"
       });
     }
 
     return res.status(200).json({ reply });
 
   } catch (err) {
-    console.error("💥 ERROR:", err);
+    console.error("ERROR:", err);
 
     return res.status(200).json({
-      reply: "系统出错了🥺：" + err.message
+      reply: "系统错误🥺：" + err.message
     });
   }
 }
