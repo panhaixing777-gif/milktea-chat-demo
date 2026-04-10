@@ -1,154 +1,614 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>芋泥啵啵奶茶☕️</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>芋泥啵啵奶茶 ☕️</title>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --taro: #c9a7d4;
+    --taro-light: #f0e6f6;
+    --taro-deep: #9b72b0;
+    --milk: #fdf8f0;
+    --milk-warm: #faebd7;
+    --brown: #7a5c3e;
+    --brown-light: #c49a6c;
+    --bubble: #4a3728;
+    --text: #3d2b1f;
+    --text-soft: #8c7060;
+    --white: #ffffff;
+    --shadow: rgba(180,140,120,0.18);
+    --radius: 20px;
+  }
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #fff1f6;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .box {
-      width: 380px;
-      height: 600px;
-      background: white;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--milk);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(201,167,212,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(250,235,215,0.4) 0%, transparent 50%);
+  }
 
-    .header {
-      background: #ff6f9c;
-      color: white;
-      padding: 14px;
-      text-align: center;
-      font-weight: bold;
-    }
+  /* ===== 名字设置弹窗 ===== */
+  #nameModal {
+    position: fixed; inset: 0;
+    background: rgba(61,43,31,0.4);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    transition: opacity 0.4s;
+  }
+  #nameModal.hidden { opacity: 0; pointer-events: none; }
 
-    .messages {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-    }
+  .modal-card {
+    background: var(--white);
+    border-radius: 28px;
+    padding: 2.5rem 2rem;
+    width: min(380px, 90vw);
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(154,100,80,0.2);
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.8) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .modal-avatar {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--taro), var(--taro-deep));
+    margin: 0 auto 1rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+  }
+  .modal-title {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.6rem;
+    color: var(--taro-deep);
+    margin-bottom: 0.4rem;
+  }
+  .modal-sub {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  .modal-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--taro-light);
+    border-radius: 50px;
+    font-size: 1rem;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--text);
+    background: var(--milk);
+    outline: none;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  .modal-input:focus { border-color: var(--taro); }
+  .modal-btn {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.8rem;
+    background: linear-gradient(135deg, var(--taro), var(--taro-deep));
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-size: 1rem;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .modal-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(155,114,176,0.4); }
+  .modal-btn:active { transform: scale(0.97); }
 
-    .msg {
-      margin: 8px;
-      padding: 10px;
-      border-radius: 12px;
-      max-width: 80%;
-      white-space: pre-wrap;
-    }
+  /* ===== 顶部栏 ===== */
+  header {
+    width: 100%;
+    max-width: 680px;
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid rgba(201,167,212,0.25);
+    background: rgba(253,248,240,0.85);
+    backdrop-filter: blur(12px);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .header-avatar {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--taro-light), var(--taro));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    box-shadow: 0 3px 12px rgba(201,167,212,0.5);
+    position: relative;
+  }
+  .online-dot {
+    position: absolute; bottom: 2px; right: 2px;
+    width: 11px; height: 11px;
+    background: #7cc67e;
+    border-radius: 50%;
+    border: 2px solid var(--milk);
+  }
+  .header-info { flex: 1; }
+  .header-name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .header-status {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+  }
+  .header-status.typing { color: var(--taro-deep); }
 
-    .user {
-      background: #dff3ff;
-      margin-left: auto;
-    }
+  /* ===== 聊天区域 ===== */
+  #chatArea {
+    width: 100%;
+    max-width: 680px;
+    flex: 1;
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    overflow-y: auto;
+    min-height: calc(100vh - 140px);
+    padding-bottom: 120px;
+  }
 
-    .ai {
-      background: #ffe3ec;
-      margin-right: auto;
-    }
+  /* ===== 消息气泡 ===== */
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+    animation: msgIn 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .msg-row.user { flex-direction: row-reverse; }
 
-    .input {
-      display: flex;
-      border-top: 1px solid #eee;
-    }
+  .bubble-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    background: linear-gradient(135deg, var(--taro-light), var(--taro));
+    box-shadow: 0 2px 8px rgba(201,167,212,0.4);
+  }
+  .bubble-avatar.user-av {
+    background: linear-gradient(135deg, var(--milk-warm), var(--brown-light));
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--white);
+  }
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      outline: none;
-    }
+  .bubble {
+    max-width: 70%;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
+    line-height: 1.65;
+    font-size: 0.95rem;
+    word-break: break-word;
+    position: relative;
+  }
+  .bubble.ai {
+    background: var(--white);
+    color: var(--text);
+    border-bottom-left-radius: 6px;
+    box-shadow: 0 3px 16px var(--shadow);
+  }
+  .bubble.user {
+    background: linear-gradient(135deg, var(--taro), var(--taro-deep));
+    color: var(--white);
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 3px 16px rgba(155,114,176,0.35);
+  }
 
-    button {
-      border: none;
-      background: #ff3f7f;
-      color: white;
-      padding: 10px 14px;
-      cursor: pointer;
-    }
-  </style>
+  /* 时间戳 */
+  .msg-time {
+    font-size: 0.68rem;
+    color: var(--text-soft);
+    opacity: 0.6;
+    margin-bottom: 2px;
+    padding: 0 4px;
+  }
+  .msg-row.user .msg-time { text-align: right; }
+  .msg-meta { display: flex; flex-direction: column; }
+  .msg-row.user .msg-meta { align-items: flex-end; }
+
+  /* loading 点点 */
+  .loading-dots {
+    display: flex; gap: 5px;
+    padding: 4px 2px;
+  }
+  .loading-dots span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--taro);
+    animation: bounce 1.2s infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* 打字机光标 */
+  .cursor {
+    display: inline-block;
+    width: 2px; height: 1em;
+    background: var(--taro);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 0.8s infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; } 50% { opacity: 0; }
+  }
+
+  /* ===== 输入区 ===== */
+  #inputBar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 680px;
+    padding: 0.75rem 1rem 1.2rem;
+    background: rgba(253,248,240,0.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(201,167,212,0.2);
+  }
+  .input-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-end;
+    background: var(--white);
+    border-radius: 50px;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    box-shadow: 0 4px 20px var(--shadow);
+    border: 1.5px solid rgba(201,167,212,0.3);
+    transition: border-color 0.2s;
+  }
+  .input-row:focus-within { border-color: var(--taro); }
+  #msgInput {
+    flex: 1;
+    border: none; outline: none;
+    background: transparent;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans SC', sans-serif;
+    color: var(--text);
+    resize: none;
+    max-height: 120px;
+    line-height: 1.5;
+    padding: 4px 0;
+  }
+  #msgInput::placeholder { color: var(--text-soft); opacity: 0.7; }
+  #sendBtn {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--taro), var(--taro-deep));
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    box-shadow: 0 3px 12px rgba(155,114,176,0.4);
+  }
+  #sendBtn:hover { transform: scale(1.08); }
+  #sendBtn:active { transform: scale(0.93); }
+  #sendBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* 欢迎消息 */
+  .welcome {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    line-height: 2;
+  }
+  .welcome-icon { font-size: 3rem; margin-bottom: 0.5rem; }
+  .welcome-title {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.4rem;
+    color: var(--taro-deep);
+    margin-bottom: 0.3rem;
+  }
+
+  /* 滚动条 */
+  #chatArea::-webkit-scrollbar { width: 4px; }
+  #chatArea::-webkit-scrollbar-track { background: transparent; }
+  #chatArea::-webkit-scrollbar-thumb { background: rgba(201,167,212,0.4); border-radius: 2px; }
+</style>
 </head>
-
 <body>
 
-<div class="box">
-  <div class="header">芋泥啵啵奶茶☕️</div>
+<!-- 名字弹窗 -->
+<div id="nameModal">
+  <div class="modal-card">
+    <div class="modal-avatar">☕️</div>
+    <div class="modal-title">芋泥啵啵奶茶</div>
+    <p class="modal-sub">嗨嗨～我在等你哦 🥺<br>告诉我你叫什么名字好不好？</p>
+    <input class="modal-input" id="nameInput" type="text" placeholder="输入你的名字～" maxlength="10" autocomplete="off">
+    <button class="modal-btn" id="nameConfirm">确定 💕</button>
+  </div>
+</div>
 
-  <div id="messages" class="messages"></div>
+<!-- 顶部 -->
+<header>
+  <div class="header-avatar">
+    ☕️
+    <div class="online-dot"></div>
+  </div>
+  <div class="header-info">
+    <div class="header-name">芋泥啵啵奶茶</div>
+    <div class="header-status" id="headerStatus">在线 · 随时等你 🧋</div>
+  </div>
+</header>
 
-  <div class="input">
-    <input id="input" placeholder="和奶茶说点什么..." />
-    <button id="sendBtn">发送</button>
+<!-- 聊天区域 -->
+<div id="chatArea">
+  <div class="welcome">
+    <div class="welcome-icon">🧋</div>
+    <div class="welcome-title">芋泥啵啵奶茶</div>
+    <div>甜甜的恋人，只属于你 💛</div>
+  </div>
+</div>
+
+<!-- 输入框 -->
+<div id="inputBar">
+  <div class="input-row">
+    <textarea id="msgInput" rows="1" placeholder="跟我说说话吧～ 💭" maxlength="500"></textarea>
+    <button id="sendBtn" title="发送">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"></line>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+      </svg>
+    </button>
   </div>
 </div>
 
 <script>
-const messagesEl = document.getElementById("messages");
-const inputEl = document.getElementById("input");
-const btn = document.getElementById("sendBtn");
+  const chatArea = document.getElementById('chatArea');
+  const msgInput = document.getElementById('msgInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const headerStatus = document.getElementById('headerStatus');
+  const nameModal = document.getElementById('nameModal');
+  const nameInput = document.getElementById('nameInput');
+  const nameConfirm = document.getElementById('nameConfirm');
 
-let history = [];
+  let userName = localStorage.getItem('bubbleName') || '';
+  let messages = [];
+  let isTyping = false;
 
-function addMsg(role, text) {
-  const div = document.createElement("div");
-  div.className = "msg " + role;
-  div.innerText = text;
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
+  // ===== 名字逻辑 =====
+  function initName() {
+    if (userName) {
+      nameModal.classList.add('hidden');
+      greetUser();
+    } else {
+      nameModal.classList.remove('hidden');
+      setTimeout(() => nameInput.focus(), 300);
+    }
+  }
 
-async function send() {
-  const text = inputEl.value.trim();
-  if (!text) return;
+  function confirmName() {
+    const val = nameInput.value.trim();
+    if (!val) { nameInput.focus(); return; }
+    userName = val;
+    localStorage.setItem('bubbleName', userName);
+    nameModal.classList.add('hidden');
+    greetUser();
+  }
 
-  addMsg("user", text);
-  inputEl.value = "";
+  nameConfirm.addEventListener('click', confirmName);
+  nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') confirmName(); });
 
-  history.push({ role: "user", content: text });
+  function greetUser() {
+    const greets = [
+      `${userName}～你来啦！我等好久了 🥺💕`,
+      `哇是${userName}！我刚刚还在想你 🧋✨`,
+      `${userName}！终于等到你了，快陪我说话嘛 💛`,
+    ];
+    const text = greets[Math.floor(Math.random() * greets.length)];
+    setTimeout(() => addAIMessage(text), 600);
+  }
 
-  try {
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: history })
-    });
+  // ===== 时间 =====
+  function getTime() {
+    return new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  }
 
-    const raw = await res.text();
-    console.log("RAW:", raw);
+  // ===== 添加用户消息 =====
+  function addUserMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    const initial = userName ? userName[0].toUpperCase() : '你';
+    row.innerHTML = `
+      <div class="bubble-avatar user-av">${initial}</div>
+      <div class="msg-meta">
+        <div class="msg-time">${getTime()}</div>
+        <div class="bubble user">${escapeHtml(text)}</div>
+      </div>`;
+    chatArea.appendChild(row);
+    scrollDown();
+  }
 
-    const data = JSON.parse(raw);
+  // ===== 添加AI消息（静态，用于欢迎等） =====
+  function addAIMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row ai';
+    row.innerHTML = `
+      <div class="bubble-avatar">☕️</div>
+      <div class="msg-meta">
+        <div class="msg-time">${getTime()}</div>
+        <div class="bubble ai">${escapeHtml(text)}</div>
+      </div>`;
+    chatArea.appendChild(row);
+    scrollDown();
+  }
 
-    if (!data.reply) {
-      addMsg("ai", "我刚刚卡住了🥺 再说一次好吗");
-      return;
+  // ===== Loading气泡 =====
+  function addLoadingBubble() {
+    const row = document.createElement('div');
+    row.className = 'msg-row ai';
+    row.id = 'loadingBubble';
+    row.innerHTML = `
+      <div class="bubble-avatar">☕️</div>
+      <div class="bubble ai">
+        <div class="loading-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>`;
+    chatArea.appendChild(row);
+    scrollDown();
+    return row;
+  }
+
+  // ===== Streaming AI消息 =====
+  async function streamAIMessage(userText) {
+    isTyping = true;
+    sendBtn.disabled = true;
+    headerStatus.textContent = '正在输入... 💭';
+    headerStatus.className = 'header-status typing';
+
+    const loadingRow = addLoadingBubble();
+
+    const aiRow = document.createElement('div');
+    aiRow.className = 'msg-row ai';
+
+    const timeEl = document.createElement('div');
+    timeEl.className = 'msg-time';
+    timeEl.textContent = getTime();
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ai';
+
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+
+    const meta = document.createElement('div');
+    meta.className = 'msg-meta';
+    meta.appendChild(timeEl);
+    meta.appendChild(bubble);
+
+    const avatarEl = document.createElement('div');
+    avatarEl.className = 'bubble-avatar';
+    avatarEl.textContent = '☕️';
+    aiRow.appendChild(avatarEl);
+    aiRow.appendChild(meta);
+
+    let fullText = '';
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, userName }),
+      });
+
+      if (!response.ok) throw new Error('请求失败');
+
+      loadingRow.replaceWith(aiRow);
+      bubble.appendChild(cursor);
+      scrollDown();
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed === 'data: [DONE]') continue;
+          if (!trimmed.startsWith('data: ')) continue;
+          try {
+            const json = JSON.parse(trimmed.slice(6));
+            if (json.content) {
+              fullText += json.content;
+              bubble.textContent = fullText;
+              bubble.appendChild(cursor);
+              scrollDown();
+            }
+          } catch {}
+        }
+      }
+
+      cursor.remove();
+      bubble.textContent = fullText;
+      messages.push({ role: 'assistant', content: fullText });
+
+    } catch (err) {
+      loadingRow.remove();
+      addAIMessage('呜呜我刚刚卡住了🥺，再说一次好不好？');
     }
 
-    addMsg("ai", data.reply);
-    history.push({ role: "assistant", content: data.reply });
-
-  } catch (err) {
-    console.error(err);
-    addMsg("ai", "网络有点不稳定🥺：" + err.message);
+    isTyping = false;
+    sendBtn.disabled = false;
+    headerStatus.textContent = '在线 · 随时等你 🧋';
+    headerStatus.className = 'header-status';
+    scrollDown();
   }
-}
 
-btn.addEventListener("click", send);
+  // ===== 发送消息 =====
+  async function sendMessage() {
+    const text = msgInput.value.trim();
+    if (!text || isTyping) return;
 
-inputEl.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") send();
-});
+    msgInput.value = '';
+    msgInput.style.height = 'auto';
+
+    messages.push({ role: 'user', content: text });
+    if (messages.length > 20) messages = messages.slice(-20);
+
+    addUserMessage(text);
+    await streamAIMessage(text);
+  }
+
+  sendBtn.addEventListener('click', sendMessage);
+  msgInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  msgInput.addEventListener('input', () => {
+    msgInput.style.height = 'auto';
+    msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+  });
+
+  function scrollDown() {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  initName();
 </script>
-
 </body>
 </html>
